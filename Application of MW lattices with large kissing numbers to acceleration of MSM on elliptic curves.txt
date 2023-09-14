@@ -1,0 +1,675 @@
+﻿// The case m = 3 (minimal points as linear combinations)
+F := Rationals();
+// The Gram matrix from Section 5.2 of eprint.iacr.org/2022/794
+M := Matrix(F, 4, 4, [
+       1,    0, -1/2,  1/2,
+       0,    1, -1/2, -1/2,
+    -1/2, -1/2,    1,    0,
+     1/2, -1/2,    0,    1 ]);
+L3 := LatticeWithGram(M);
+
+
+k := KissingNumber(L3);
+assert(k eq 24);
+lam1 := Minimum(L3);
+assert(lam1 eq 1);
+SV := ShortestVectors(L3);
+F<P1,wP1,P2,wP2> := FunctionField(F, 4);
+
+
+printf"The 1-norm of a minimal point:\n\n";
+while #SV gt 0 do
+    v := Random(SV);
+    u := v;
+
+
+    for i := 1 to 6 do
+        assert(Norm(u) eq lam1);
+        oneNorm := 0;
+        for j := 1 to 4 do
+            oneNorm := oneNorm + Abs(u[j]);
+        end for;
+        Pu := u[1]*P1 + u[2]*P2 + u[3]*wP1 + u[4]*wP2;
+        oneNorm, Pu;
+        Exclude(~SV, u);
+        u := L3 ! [u[3], u[4], u[3]-u[1], u[4]-u[2]];
+    end for;
+
+
+    assert(u eq v);
+    printf"\n";
+end while;
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// The case m = 3 (minimal points as coordinates x, y)
+F := Rationals();
+PR<t> := PolynomialRing(F);
+F<w> := ext<F | t^2 + t + 1>;
+c := -1/108;
+
+
+F<t> := FunctionField(F);
+E3<X,Y,Z> := EllipticCurve([0, t^3 + c]);
+W := map<E3 -> E3 | [w*X, Y, Z]>;
+P := [];
+
+
+P[1] := E3 ! [-t, (2*w + 1)/18, 1];
+P[2] := E3 ! [-t + 1/3, t - 1/6, 1];
+P[3] := W(P[1]) + P[2];
+P[4] := W(P[2]) - P[1];
+P[3] eq E3 ! W([-w*t + 1/3, w*t - 1/6, 1]);
+P[4] eq E3 ! [-w^2*t + 1/3, w^2*t - 1/6, 1];
+
+
+for i := 1 to 4 do
+    printf"\nP%o = %o\n", i, P[i];
+    assert(CanonicalHeight(P[i]) eq 1);
+    x := P[i][1];  
+    y := P[i][2];  
+    assert(Denominator(x) eq 1);
+    assert(Denominator(y) eq 1);
+    assert(Degree(x) eq 1);
+    assert(Degree(y) eq 1  or  i eq 1);
+end for;
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+// The case m = 4 (minimal points as linear combinations)
+F := Rationals();
+// The Gram matrix from Section 5.3 of eprint.iacr.org/2022/794
+M := Matrix(F, 6, 6, [
+     4, -2, -2, -2,  1,  1,
+    -2,  4,  1,  1, -2,  1,
+    -2,  1,  4,  1, -2, -2,
+    -2,  1,  1,  4, -2, -2,
+     1, -2, -2, -2,  4,  1,
+     1,  1, -2, -2,  1,  4 ]);
+M := M/3;
+L4 := LatticeWithGram(M);
+
+
+k := KissingNumber(L4);
+assert(k eq 54);
+lam1 := Minimum(L4);
+assert(lam1 eq 4/3);
+SV := ShortestVectors(L4);
+F<P1,wP1,P2,wP2,P3,wP3> := FunctionField(F, 6);
+
+
+printf"The 1-norm of a minimal point:\n\n";
+while #SV gt 0 do
+    v := Random(SV);
+    u := v;
+
+
+    for i := 1 to 6 do
+        assert(Norm(u) eq lam1);
+        oneNorm := 0;
+        for j := 1 to 6 do
+            oneNorm := oneNorm + Abs(u[j]);
+        end for;
+        Pu := u[1]*P1 + u[2]*P2 + u[3]*P3 + 
+            u[4]*wP1 + u[5]*wP2 + u[6]*wP3;
+        oneNorm, Pu;
+        Exclude(~SV, u);
+        u := L4 ! [u[4], u[5], u[6], 
+            u[4]-u[1], u[5]-u[2], u[6]-u[3]];
+    end for;
+
+
+    assert(u eq v);
+    printf"\n";
+end while;
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// The case m = 4 (minimal points as coordinates x, y)
+F := Rationals();
+PR<t> := PolynomialRing(F);
+F<i,w> := NumberField([t^2 + 1, t^2 + t + 1]);
+s3 := (2*w + 1)/i;
+assert(s3^2 eq 3);
+v := 26*s3 - 45;
+c := 1/(2^6*3*v);
+cc := (2*s3 + 3)/12;
+assert(cc^3 eq c);
+
+
+F<t> := FunctionField(F);
+E4<X,Y,Z> := EllipticCurve([0, t^4 + c]);
+W := map<E4 -> E4 | [w*X, Y, Z]>;
+P := [];
+
+
+x := -cc;
+y := t^2;
+P[1] := E4 ! [x, y, 1];
+x := t + (s3 + 3)/12;
+y := t^2 + t/2 + (s3 + 2)/8;
+P[2] := E4 ! [x, y, 1];
+x := i*t + (s3 + 3)/12;
+y := t^2 - i*t/2 - (s3 + 2)/8;
+P[3] := E4 ! [x, y, 1];
+
+
+P[4] := P[1] + P[2]; 
+P[5] := P[1] + P[3]; 
+P[6] := W(P[2]) + P[3];
+P[7] := P[1] + P[2] - W(P[3]);
+P[8] := W(P[1]) - P[2] + W(P[3]);
+P[9] := P[1] + W(P[1]) + W(P[2]) + P[3];
+
+
+P[7] eq P[4] - W(P[3]);
+P[8] eq W(P[5]) - P[2];
+P[9] eq W(P[4]) + P[5];
+
+
+for i := 1 to 9 do
+    printf"\nP%o = %o\n", i, P[i];
+    assert(CanonicalHeight(P[i]) eq 4/3);
+    x := P[i][1];  
+    y := P[i][2];  
+    assert(Denominator(x) eq 1);
+    assert(Denominator(y) eq 1);
+    assert(Degree(x) eq 1  or  i eq 1);
+    assert(Degree(y) eq 2);
+end for;
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+// The case of the sublattice L4prime (Gram matrix and minimal points as coordinates x, y)
+F := Rationals();
+PR<t> := PolynomialRing(F);
+F<i,w> := NumberField([t^2 + 1, t^2 + t + 1]);
+s3 := (2*w + 1)/i;
+assert(s3^2 eq 3);
+v := 26*s3 - 45;
+c := 1/(2^6*3*v);
+cc := (2*s3 + 3)/12;
+assert(cc^3 eq c);
+
+
+F<t> := FunctionField(F);
+E4<X,Y,Z> := EllipticCurve([0, t^4 + c]);
+W := map<E4 -> E4 | [w*X, Y, Z]>;
+P := [];
+
+
+x := -cc;
+y := t^2;
+P[1] := E4 ! [x, y, 1];
+x := t + (s3 + 3)/12;
+y := t^2 + t/2 + (s3 + 2)/8;
+P[2] := E4 ! [x, y, 1];
+x := i*t + (s3 + 3)/12;
+y := t^2 - i*t/2 - (s3 + 2)/8;
+P[3] := E4 ! [x, y, 1];
+
+
+Ppr := [];
+Ppr[1] := P[1] - W(P[2]);
+Ppr[2] := P[1] - W(P[3]);
+Ppr[3] := P[2] - W(P[3]);
+
+
+B := [Ppr[1], Ppr[2], Ppr[3], 
+    W(Ppr[1]), W(Ppr[2]), W(Ppr[3])];
+HeightPairingMatrix(B);
+printf"\n";
+
+
+
+
+
+
+Ppr[4] := Ppr[1] - Ppr[2]; 
+Ppr[5] := W(Ppr[1]) - Ppr[3];
+Ppr[6] := W(Ppr[2]) - Ppr[3]; 
+Ppr[7] := W(Ppr[1]) + Ppr[2];
+Ppr[8] := Ppr[1] + W(Ppr[3]);
+Ppr[9] := Ppr[2] + W(Ppr[3]);
+
+
+Ppr[10] := W(Ppr[1]) + Ppr[2] - Ppr[3];
+Ppr[11] := W(Ppr[1]) + Ppr[2] + W(Ppr[3]);
+Ppr[12] := Ppr[1] + W(Ppr[1]) + Ppr[2] + W(Ppr[3]);
+Ppr[10] eq Ppr[7] - Ppr[3];
+Ppr[11] eq W(Ppr[3]) + Ppr[7];
+Ppr[12] eq Ppr[1] + Ppr[11];
+
+
+for i := 1 to 12 do
+    printf"\nP%opr = %o\n", i, Ppr[i];
+    assert(CanonicalHeight(Ppr[i]) eq 2);
+    x := Ppr[i][1];  
+    y := Ppr[i][2];  
+    assert(Denominator(x) eq 1);
+    assert(Denominator(y) eq 1);
+    assert(Degree(x) eq 2);
+    assert(Degree(y) eq 3);
+end for;
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// The case of the sublattice L4prime (minimal points as linear combinations)
+F := Rationals();
+M := Matrix(F, 6, 6, [
+     2,  1,  0, -1,  0, -1,
+     1,  2,  0, -1, -1, -1,
+     0,  0,  2,  1,  1, -1,
+    -1, -1,  1,  2,  1,  0,
+     0, -1,  1,  1,  2,  0,
+    -1, -1, -1,  0,  0,  2 ]);
+Del := Determinant(M);
+assert(Del eq 3);
+L4pr := LatticeWithGram(M);
+
+
+k := KissingNumber(L4pr);
+assert(k eq 72);
+lam1 := Minimum(L4pr);
+assert(lam1 eq 2);
+SV := ShortestVectors(L4pr);
+F<P1pr,wP1pr,P2pr,wP2pr,P3pr,wP3pr> := FunctionField(F, 6);
+
+
+printf"The 1-norm of a minimal point:\n\n";
+while #SV gt 0 do
+    v := Random(SV);
+    u := v;
+
+
+    for i := 1 to 6 do
+        assert(Norm(u) eq lam1);
+        oneNorm := 0;
+        for j := 1 to 6 do
+            oneNorm := oneNorm + Abs(u[j]);
+        end for;
+        Pupr := u[1]*P1pr + u[2]*P2pr + u[3]*P3pr + 
+            u[4]*wP1pr + u[5]*wP2pr + u[6]*wP3pr;
+        oneNorm, Pupr;
+        Exclude(~SV, u);
+        u := L4pr ! [u[4], u[5], u[6], 
+            u[4]-u[1], u[5]-u[2], u[6]-u[3]];
+    end for;
+
+
+    assert(u eq v);
+    printf"\n";
+end while;
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+// The case m = 5 (minimal points as linear combinations)
+F := Rationals();
+// The Gram matrix from Section 5.4 of eprint.iacr.org/2022/794
+M := Matrix(F, 8, 8, [
+     2, -1,  0,  0, -1,  1,  0,  0,
+    -1,  2, -1,  0,  0, -1,  1,  0,
+     0, -1,  2, -1,  0,  0, -1,  1,
+     0,  0, -1,  2,  0,  0,  0, -1,
+    -1,  0,  0,  0,  2, -1,  0,  0,
+     1, -1,  0,  0, -1,  2, -1,  0,
+     0,  1, -1,  0,  0, -1,  2, -1,
+     0,  0,  1, -1,  0,  0, -1,  2 ]);
+L5 := LatticeWithGram(M);
+
+
+k := KissingNumber(L5);
+assert(k eq 240);
+lam1 := Minimum(L5);
+assert(lam1 eq 2);
+SV := ShortestVectors(L5);
+F<P1,wP1,P2,wP2,P3,wP3,P4,wP4> := FunctionField(F, 8);
+
+
+printf"The 1-norm of a minimal point:\n\n";
+while #SV gt 0 do
+    v := Random(SV);
+    u := v;
+
+
+    for i := 1 to 6 do
+        assert(Norm(u) eq lam1);
+        oneNorm := 0;
+        for j := 1 to 8 do
+            oneNorm := oneNorm + Abs(u[j]);
+        end for;
+        Pu := u[1]*P1 + u[2]*P2 + u[3]*P3 + u[4]*P4 + 
+            u[5]*wP1 + u[6]*wP2 + u[7]*wP3 + u[8]*wP4;
+        oneNorm, Pu;
+        Exclude(~SV, u);
+        u := L5 ! [u[5], u[6], u[7], u[8], 
+            u[5]-u[1], u[6]-u[2], u[7]-u[3], u[8]-u[4]];
+    end for;
+
+
+    assert(u eq v);
+    printf"\n";
+end while;
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// The case m = 5 (minimal points as coordinates x, y)
+F := Rationals();
+PR<t> := PolynomialRing(F);
+F<w,z> := NumberField([ t^2 + t + 1, t^4 + t^3 + t^2 + t + 1 ]);
+s5 := 2*z^3 + 2*z^2 + 1;
+assert(s5^2 eq 5);
+v := z^2*(z - 1)*(2*w + 1);
+assert( v^2 eq 3*(s5 + 5)/2 );
+theta := 564300 + 252495*s5 + 170252*v + 76074*s5*v;
+c := 1/(60*theta);
+
+
+F<t> := FunctionField(F);
+E5<X,Y,Z> := EllipticCurve([0, t^5 + c]);
+W := map<E5 -> E5 | [w*X, Y, Z]>;
+P := [];
+
+
+for i := 0 to 3 do
+    u := z^i;
+    a0 := -( (8289*z^3 + 35113*z^2 + 43402*z + 21701)*w + 
+    (26238*z^3 + 39650*z^2 + 21701*z - 2804) )*u^10/15;
+    a1 := -( (58*z^3 + 246*z^2 + 304*z + 152)*w + 
+    (184*z^3 + 278*z^2 + 152*z - 19) )*u^4/5; 
+    a2 := 1/u^2;
+
+
+    b0 := ( 12*a0*a1 - a1^3*u^2 - 12*a0*u^4 + 15*a1^2*u^6 + 9*a1*u^10 + u^14 )*u/16;
+    b1 := ( 12*a0 + 3*a1^2*u^2 - 6*a1*u^6 - u^10 )/(8*u);
+    b2 := ( 3*a1 + u^4 )/(2*u);
+    b3 := 1/u^3;
+
+
+    x := a2*t^2 + a1*t + a0;
+    y := b3*t^3 + b2*t^2 + b1*t + b0;
+    P[i+1] := E5 ! [x, y, 1];
+end for;
+
+
+
+
+
+
+P[5] := P[1] + P[2];
+P[6] := P[2] + P[3];
+P[7] := P[3] + P[4];
+P[8] := P[1] - W(P[2]); 
+P[9] := P[2] - W(P[3]); 
+P[10] := P[3] - W(P[4]);
+
+
+P[11] := P[1] + P[2] + P[3];
+P[12] := P[2] + P[3] + P[4]; 
+P[13] := P[1] + P[2] - W(P[3]);
+P[14] := P[2] + P[3] - W(P[4]); 
+P[15] := P[1] - W(P[2]) - W(P[3]);
+P[16] := P[2] - W(P[3]) - W(P[4]);
+
+
+P[17] := P[1] + P[2] + P[3] + P[4]; 
+P[18] := P[1] + P[2] + P[3] - W(P[4]);
+P[19] := P[1] + P[2] - W(P[3]) - W(P[4]); 
+P[20] := P[1] - W(P[2]) - W(P[3]) - W(P[4]);
+P[21] := P[1] + P[2] - W(P[2]) - W(P[3]);
+P[22] := W(P[1]) + P[2] + W(P[2]) + P[3];
+P[23] := P[2] + P[3] - W(P[3]) - W(P[4]);
+P[24] := W(P[2]) + P[3] + W(P[3]) + P[4]; 
+
+
+P[25] := P[1] + P[2] + P[3] - W(P[3]) - W(P[4]);
+P[26] := P[1] - W(P[2]) - P[3] - W(P[3]) - P[4];
+P[27] := P[1] + P[2] - W(P[2]) - W(P[3]) - W(P[4]);
+P[28] := P[1] + W(P[1]) + P[2] + P[3] - W(P[4]);
+P[29] := W(P[1]) + P[2] + W(P[2]) + P[3] + P[4];
+P[30] := W(P[1]) + W(P[2]) + P[3] + W(P[3]) + P[4]; 
+
+
+P[31] := P[1] + 2*P[2] + P[3] - W(P[3]) - W(P[4]);
+P[32] := P[1] + P[2] - W(P[2]) - 2*W(P[3]) - W(P[4]);
+P[33] := P[1] + P[2] - W(P[2]) + P[3] - W(P[3]) - W(P[4]);
+P[34] := P[1] + P[2] - W(P[2]) - W(P[3]) - P[4] - W(P[4]);
+P[35] := P[1] + W(P[1]) + P[2] + P[3] - W(P[3]) - W(P[4]); 
+
+
+P[36] := P[1] + P[2] - W(P[2]) - 2*W(P[3]) - P[4] - W(P[4]);
+P[37] := P[1] + W(P[1]) + 2*P[2] + P[3] - W(P[3]) - W(P[4]); 
+
+
+P[38] := P[1] + P[2] - W(P[2]) - 2*W(P[3]) - P[4] - 2*W(P[4]);
+P[39] := W(P[1]) + P[2] + 2*W(P[2]) + 2*P[3] + W(P[3]) + P[4];
+P[40] := 2*P[1] + W(P[1]) + 2*P[2] + P[3] - W(P[3]) - W(P[4]);
+
+
+
+
+
+
+P[11] eq P[3] + P[5]; 
+P[12] eq P[4] + P[6]; 
+P[13] eq P[1] + P[9];
+P[14] eq P[2] + P[10];
+P[15] eq P[8] - W(P[3]);
+P[16] eq P[9] - W(P[4]);
+
+
+P[17] eq P[5] + P[7]; 
+P[18] eq P[5] + P[10];
+P[19] eq P[1] + P[16]; 
+P[20] eq P[15] - W(P[4]);
+P[21] eq P[2] + P[15];
+P[22] eq W(P[5]) + P[6];
+P[23] eq P[3] + P[16];
+P[24] eq W(P[6]) + P[7]; 
+
+
+P[25] eq P[3] + P[19];
+P[26] eq P[15] - P[7];
+P[27] eq P[2] + P[20];
+P[28] eq W(P[1]) + P[18];
+P[29] eq P[4] + P[22];
+P[30] eq P[7] + W(P[11]); 
+
+
+P[31] eq P[11] + P[16];
+P[32] eq P[15] + P[16];
+P[33] eq P[11] - W(P[12]);
+P[34] eq P[27] - P[4];
+P[35] eq P[28] - W(P[3]);
+
+
+P[36] eq P[34] - W(P[3]); 
+P[37] eq P[2] + P[35]; 
+
+
+P[38] eq P[36] - W(P[4]);
+P[39] eq W(P[9]) + P[29];
+P[40] eq P[1] + P[37];
+
+
+
+
+
+
+for i := 1 to 40 do
+    printf"\nP%o = %o\n", i, P[i];
+    assert(CanonicalHeight(P[i]) eq 2);
+    x := P[i][1];  
+    y := P[i][2];  
+    assert(Denominator(x) eq 1);
+    assert(Denominator(y) eq 1);
+    assert(Degree(x) eq 2);
+    assert(Degree(y) eq 3);
+end for;
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+// Table 3
+// Lattice L2
+r := 2;
+k := 6;
+degx := 0;
+degy := 1;
+
+
+// Lattice L3
+r := 4;
+k := 24;
+degx := 1;
+degy := 1;
+
+
+// Lattice L4
+r := 6;
+k := 54;
+degx := 1;
+degy := 2;
+
+
+// Lattice L4prime
+r := 6;
+k := 72;
+degx := 2;
+degy := 3;
+
+
+// Lattices L5, L6
+r := 8;
+k := 240;
+degx := 2;
+degy := 3;
+
+
+A := k/6 - r/2;
+M := degx + degy + 2;
+printf"A = %o
+M = %o
+10 - M = %o
+16 - M = %o
+10A = %o
+16A = %o
+MA = %o 
+(10 - M)A = %o 
+(16 - M)A = %o",
+    A, M, 10 - M, 16 - M, 10*A, 16*A, M*A, (10 - M)*A, (16 - M)*A;
